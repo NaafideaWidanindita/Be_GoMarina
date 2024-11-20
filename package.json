@@ -1,15 +1,32 @@
 {
   "name": "be_gomarina",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "rest api express js gomarina web mobile",
+  "main": "app.js",
+  "type":"module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon app.js"
   },
-  "keywords": [],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NaafideaWidanindita/Be_GoMarina.git"
+  },
+  "author": "kak dea",
   "license": "ISC",
-  "description": "",
+  "bugs": {
+    "url": "https://github.com/NaafideaWidanindita/Be_GoMarina/issues"
+  },
+  "homepage": "https://github.com/NaafideaWidanindita/Be_GoMarina#readme",
   "dependencies": {
-    "express": "^4.21.1"
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-fileupload": "^1.5.1",
+    "http-errors": "^2.0.0",
+    "jade": "^1.11.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.11.4",
+    "sequelize": "^6.37.5"
   }
 }
