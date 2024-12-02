@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const authRoutes = require("./routes/authRoutes");
-const { checkConnection } = require("./models/db");
+const { testConnection } = require("./Database/db");
+const Router = require("./Router/index.js");
 
 dotenv.config();
 
@@ -11,10 +11,10 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", authRoutes);
+app.use(Router);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
-  checkConnection();
+  testConnection();
   console.log(`Server running on port http://localhost:${PORT}`);
 });
