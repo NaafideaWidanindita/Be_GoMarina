@@ -6,9 +6,10 @@ const agendaRoutes = require("./agendaRoutes");
 const galeriRoutes = require("./galeriRoutes");
 const paymentRoutes = require("./paymentRoutes");
 const cartItemRoutes = require("./cart_itemRoutes");
+const roleRoutes = require("./roleRoutes");
 
 const Router = express();
 const api = "/api/v1";
-Router.use(api,authRoutes, kontenRoutes, mitraRoutes, agendaRoutes, galeriRoutes, paymentRoutes, cartItemRoutes);
+Router.use(api,authRoutes, kontenRoutes, mitraRoutes, agendaRoutes, galeriRoutes, paymentRoutes, cartItemRoutes, roleRoutes);
 
 module.exports = Router;
