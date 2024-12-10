@@ -4,7 +4,7 @@ const db = mysql.createPool({
     host: "localhost",
     user: "root",
     password: "",
-    database: "db_gomarina",
+    database: "be_gomarina",
 });
 
 async function testConnection() {
