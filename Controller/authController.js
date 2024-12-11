@@ -55,7 +55,9 @@ exports.signIn = async (req, res) => {
       user: { 
         id: user.id,
         username: user.username,
-        role: user.role
+        role: user.role,
+        telp: user.telp,
+        password: user.password,
       }
     });
 

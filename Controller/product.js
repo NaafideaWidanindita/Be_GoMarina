@@ -34,10 +34,12 @@ const getProductById = async (req, res) => {
       });
     }
 
+    const imageUrl = product.image ? `http://localhost:5000/product/${product.image}` : "";
+
     res.status(200).json({
       success: true,
       message: "Product retrieved successfully!",
-      data: product
+      data: product,imageUrl
     });
   } catch (error) {
     res.status(500).json({
