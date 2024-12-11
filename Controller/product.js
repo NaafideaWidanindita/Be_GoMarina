@@ -4,10 +4,14 @@ const { query } = require("../Database/db");
 const getAllProducts = async (req, res) => {
     try {
       const results = await query('SELECT * FROM product');
+      const productsWithImageUrl = results.map(product => ({
+        ...product,
+        imageUrl: product.image ? `http://localhost:5000/product/${product.image}` : ""
+      }));
       res.status(200).json({
         success: true,
         message: "Products retrieved successfully!",
-        data: results
+        data: productsWithImageUrl
       });
     } catch (error) {
       console.error("Error retrieving products:", error.message);
@@ -34,12 +38,14 @@ const getProductById = async (req, res) => {
       });
     }
 
-    const imageUrl = product.image ? `http://localhost:5000/product/${product.image}` : "";
-
+    const productWithImageUrl = {
+      ...product,
+      imageUrl: product.image ? `http://localhost:5000/product/${product.image}` : ""
+    };
     res.status(200).json({
       success: true,
       message: "Product retrieved successfully!",
-      data: product,imageUrl
+      data: productWithImageUrl
     });
   } catch (error) {
     res.status(500).json({
