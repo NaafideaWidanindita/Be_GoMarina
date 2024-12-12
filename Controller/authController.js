@@ -11,12 +11,43 @@ exports.signUp = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    await query(
+
+    const userResult = await query(
       'INSERT INTO role (username, password, name, telp, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [username, hashedPassword, name, telp, role || "user", new Date(), new Date()]
     );
 
-    return res.status(201).json({ success: true, message: "User created successfully!" });
+    const role_id = userResult.insertId;
+
+    await query(
+      'INSERT INTO address (role_id, provinsi, city, kecamatan, postalCode, street, detail, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [role_id, "Riau", "Batam", "", "", "", "", new Date(), new Date()]
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "User and address created successfully!",
+      user: {
+        id: role_id,
+        username,
+        name,
+        telp,
+        role: role || "user",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      address: {
+        role_id,
+        provinsi: "Riau",
+        city: "Batam",
+        kecamatan: "",
+        postalCode: "",
+        street: "",
+        detail: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error registering user.", error });
   }
@@ -65,8 +96,6 @@ exports.signIn = async (req, res) => {
     return res.status(500).json({ message: 'Error logging in', error });
   }
 };
-
-
 
 // Update User
 exports.updateUser = async (req, res) => {
@@ -124,8 +153,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-
-
 // Delete User
 exports.deleteUser = async (req, res) => {
   const { userId } = req.user; // Assuming you are using JWT and have the user ID available
@@ -135,5 +162,44 @@ exports.deleteUser = async (req, res) => {
     return res.status(200).json({ success: true, message: "User deleted successfully!" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error deleting user.", error });
+  }
+};
+
+// Edit Alamat
+exports.updateAddress = async (req, res) => {
+  const { role_id } = req.params;
+  const { kecamatan, postalCode, street, detail } = req.body;
+
+  if (!role_id) {
+    return res.status(400).json({ message: "Role ID is required" });
+  }
+
+  if (!kecamatan || !postalCode || !street || !detail) {
+    return res.status(400).json({ message: "All fields in the request body are required" });
+  }
+
+  try {
+    const result = await query(
+      'UPDATE address SET kecamatan = ?, postalCode = ?, street = ?, detail = ?, updatedAt = ? WHERE role_id = ?',
+      [kecamatan, postalCode, street, detail, new Date(), role_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Address not found." });
+    }
+
+    // data yg diedit
+    const updatedAddress = await query(
+      'SELECT * FROM address WHERE role_id = ?',
+      [role_id]
+    );
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Address updated successfully!",
+      data:updatedAddress[0]
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating address.", error });
   }
 };
