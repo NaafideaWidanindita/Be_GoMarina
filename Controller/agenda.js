@@ -1,15 +1,19 @@
 const {query} = require("../Database/db");
 
 const tambahAgenda = async(req,res) => {
-    const{name, deskripsi, image} = req.body;
     try {
+        const { name, deskripsi } = req.body;
+        if (!name || !deskripsi) {
+            return res.status(400).json({ msg: "Field 'name' atau 'deskripsi' tidak boleh kosong!" });
+        }
+        const image = req.file ? `/uploads/images/${req.file.filename}` : null;
+
         await query(`INSERT INTO agenda (name, deskripsi, image) VALUES(?, ?, ?)`, [name, deskripsi, image]);
+
         return res.status(200).json({
             msg: "Penambahan agenda berhasil!",
-        data: {
-            ...req.body,
-        },
-    });
+            data: { name, deskripsi, image },
+        });
     } catch (error) {
         console.log("Penambahan agenda gagal", error);
     }

@@ -2,6 +2,9 @@ const {query} = require("../Database/db");
 
 const tambahKonten = async(req,res) => {
     const{title, descriptionGarden, descriptionAdd, visi, misi, address, contact} = req.body;
+    if (!title || !descriptionGarden || !descriptionAdd || !visi || !misi || !address || !contact) {
+        return res.status(400).json({ msg: "Semua field wajib diisi!" });
+    }
     try {
         await query(`INSERT INTO konten (title, description_garden, description_add, visi, misi, address, contact) VALUES(?, ?, ?, ?, ?, ?, ?)`, [title, descriptionGarden, descriptionAdd, visi, misi, address, contact]);
         return res.status(200).json({

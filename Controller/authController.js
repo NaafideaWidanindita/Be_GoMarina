@@ -1,5 +1,6 @@
 const { query } = require("../Database/db");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
 // Register User or Admin
 exports.signUp = async (req, res) => {
@@ -41,23 +42,37 @@ exports.signIn = async (req, res) => {
       return res.status(401).json({ message: 'Invalid username/password' });
     }
 
-    // If login is successful, you can create a token here if needed
-    // const token = jwt.sign(
-        //   { userId: user.id, username: user.username, role: user.role },
-    //   process.env.JWT_SECRET, // Pastikan Anda sudah menambahkan JWT_SECRET di .env
-    //   { expiresIn: '1h' } // Token berlaku selama 1 jam
-    // );
+    // Generate Access Token (1 hour expiry)
+    const accessToken = jwt.sign(
+      { userId: user.id, username: user.username, role: user.role },
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }      
+    );
+
+    // Generate Refresh Token (1 month expiry)
+    const refreshToken = jwt.sign(
+      { userId: user.id, username: user.username, role: user.role },
+      process.env.JWT_REFRESH_SECRET, 
+      { expiresIn: '30d' }  // Refresh token expires in 30 days
+    );
+
+    const cookieOptions = {
+      httpOnly: true,  // Secure cookie, cannot be accessed via JavaScript
+      secure: process.env.NODE_ENV === 'production',  // Only for HTTPS
+      maxAge: 30 * 24 * 60 * 60 * 1000  // Cookie valid for 30 days
+    };
+
+    res.cookie('refreshToken', refreshToken, cookieOptions);
 
     return res.status(200).json({
       success: true, 
       message: 'Login successful',
-      // token: token, // If you're returning a token
+      accessToken,  // Send Access Token
       user: { 
         id: user.id,
         username: user.username,
         role: user.role,
-        telp: user.telp,
-        password: user.password
+        telp: user.telp
       }
     });
   } catch (error) {
@@ -66,13 +81,33 @@ exports.signIn = async (req, res) => {
   }
 };
 
+// Refresh Access Token
+exports.refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  
+  if (!refreshToken) {
+    return res.status(400).json({ message: 'Refresh token is required' });
+  }
 
+  try {
+    // Verify the refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    
+    // Generate a new access token
+    const accessToken = jwt.sign(
+      { userId: decoded.userId, username: decoded.username, role: decoded.role },
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }
+    );
+    
+    return res.status(200).json({ accessToken });
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid or expired refresh token', error });
+  }
+};
 
 // Update User
 exports.updateUser = async (req, res) => {
-  console.log("Request params:", req.params);
-  console.log("Request body:", req.body);
-
   const { username, password, name, telp } = req.body;
   const { id } = req.params;
 
@@ -80,7 +115,6 @@ exports.updateUser = async (req, res) => {
     return res.status(400).json({ message: 'ID and at least one field to update are required' });
   }
 
-  // Prepare the update query and values
   let fields = [];
   let values = [];
 
@@ -102,16 +136,13 @@ exports.updateUser = async (req, res) => {
     values.push(telp);
   }
 
-  // If no fields are provided to update, return error
   if (fields.length === 0) {
     return res.status(400).json({ message: 'At least one field must be provided to update' });
   }
 
-  // Add the user ID to the values for the WHERE clause
   values.push(id);
 
   try {
-    // Execute the update query
     await query(
       `UPDATE role SET ${fields.join(", ")} WHERE id = ?`,
       values
@@ -123,8 +154,6 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Error updating user.", error });
   }
 };
-
-
 
 // Delete User
 exports.deleteUser = async (req, res) => {

@@ -1,15 +1,19 @@
 const {query} = require("../Database/db");
 
 const tambahMitra = async(req,res) => {
-    const{name, image} = req.body;
     try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ msg: "Field 'name' tidak boleh kosong!" });
+        }
+        const image = req.file ? `/uploads/images/${req.file.filename}` : null;
+
         await query(`INSERT INTO mitra (name, image) VALUES(?, ?)`, [name, image]);
+
         return res.status(200).json({
             msg: "Penambahan mitra berhasil!",
-        data: {
-            ...req.body,
-        },
-    });
+            data: { name, image },
+        });
     } catch (error) {
         console.log("Penambahan mitra gagal", error);
     }

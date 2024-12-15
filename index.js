@@ -8,14 +8,19 @@ const Router = require("./Router/index.js");
 dotenv.config();
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use(Router)
+const corsOptions = {
+    origin: 'http://localhost:5173',  
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+};
+app.use(cors(corsOptions)); 
 
-//Mengambil gambar
-app.use('/product', express.static(path.join(__dirname, 'uploads/imagesproduct')));
+app.use(express.json());
+app.use('/api/v1/uploads/images', express.static(path.resolve(__dirname, 'uploads/images')));
+app.use(Router);
 
 app.listen(process.env.APP_PORT, async () => {
     await testConnection();
-    console.log(`http://localhost:${process.env.APP_PORT}`);
+    console.log(`Server berjalan di http://localhost:${process.env.APP_PORT}`);
 });

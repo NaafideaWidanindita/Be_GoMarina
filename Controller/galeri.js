@@ -1,17 +1,23 @@
 const {query} = require("../Database/db");
 
-const tambahGaleri = async(req,res) => {
-    const{image, option} = req.body;
+const tambahGaleri = async (req, res) => {
     try {
+        const { option } = req.body;
+        if (!option) {
+            return res.status(400).json({ msg: "Field 'option' tidak boleh kosong!" });
+        }
+
+        const image = req.file ? `/uploads/images/${req.file.filename}` : null;
+
         await query(`INSERT INTO galeri (image, option) VALUES(?, ?)`, [image, option]);
+
         return res.status(200).json({
             msg: "Penambahan galeri berhasil!",
-        data: {
-            ...req.body,
-        },
-    });
+            data: { option, image },
+        });
     } catch (error) {
         console.log("Penambahan galeri gagal", error);
+        return res.status(500).json({ msg: "Penambahan galeri gagal!" });
     }
 };
 
