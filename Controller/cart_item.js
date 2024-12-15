@@ -1,19 +1,37 @@
 const {query} = require("../Database/db");
 
-const tambahCartItem = async(req,res) => {
-    const{jumlah, price} = req.body;
-    try {
-        await query(`INSERT INTO cart_item (jumlah, price) VALUES(?, ?)`, [jumlah, price]);
-        return res.status(200).json({
-            msg: "Penambahan cart berhasil!",
-        data: {
-            ...req.body,
-        },
-    });
-    } catch (error) {
-        console.log("Penambahan cart gagal", error);
+// Add Cart Item
+const addCartItem = async (req, res) => {
+    //roleid dan product id dari url
+    const { role_id, product_id } = req.params;
+    const { jumlah, price } = req.body;
+
+    if (!role_id || !product_id) {
+      return res.status(400).json({ message: "Role ID and Product ID are required" });
     }
-};
+  
+    if (!jumlah || !price) {
+      return res.status(400).json({ message: "Jumlah and Price are required" });
+    }
+  
+    try {
+      const result = await query(
+        'INSERT INTO card_item (role_id, product_id, jumlah, price, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
+        [role_id, product_id, jumlah, price, new Date(), new Date()]
+      );
+  
+      const insertedCartItem = await query('SELECT * FROM card_item WHERE id = ?', [result.insertId]);
+  
+      return res.status(201).json({
+        success: true,
+        message: "Cart item added successfully!",
+        cartItem: insertedCartItem[0],
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Error adding cart item.", error });
+    }
+  };
+  
 
 const ambilDataCartItem = async(req,res) => {
     try {
@@ -62,7 +80,7 @@ const ambilCartItemId = async(req,res) => {
 };
 
 module.exports = {
-    tambahCartItem,
+    addCartItem,
     ambilDataCartItem,
     perbaruiCartItem,
     hapusCartItem,

@@ -1,7 +1,7 @@
 const {query} = require("../Database/db");
 const bcrypt = require("bcrypt");
 
-// Get User by ID
+// Get User by ID (INI GAJADI DIPAKE KEKNYA)
 exports.getUserById = async (req, res) => {
   const { id } = req.params;
 
