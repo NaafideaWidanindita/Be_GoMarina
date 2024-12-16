@@ -103,7 +103,8 @@ exports.signIn = async (req, res) => {
         id: user.id,
         username: user.username,
         role: user.role,
-        telp: user.telp
+        telp: user.telp,
+        password: user.password
       }
     });
   } catch (error) {
@@ -160,6 +161,39 @@ exports.updateUser = async (req, res) => {
   } catch (error) {
     console.error("Error in updateUser:", error);
     res.status(500).json({ success: false, message: "Error updating user.", error });
+  }
+};
+
+// Edit Alamat
+exports.updateAddress = async (req, res) => {
+  const { role_id } = req.params;
+  const { kecamatan, postalCode, street, detail } = req.body;
+  if (!role_id) {
+    return res.status(400).json({ message: "Role ID is required" });
+  }
+  if (!kecamatan || !postalCode || !street || !detail) {
+    return res.status(400).json({ message: "All fields in the request body are required" });
+  }
+  try {
+    const result = await query(
+      'UPDATE address SET kecamatan = ?, postalCode = ?, street = ?, detail = ?, updatedAt = ? WHERE role_id = ?',
+      [kecamatan, postalCode, street, detail, new Date(), role_id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Address not found." });
+    }
+    // data yg diedit
+    const updatedAddress = await query(
+      'SELECT * FROM address WHERE role_id = ?',
+      [role_id]
+    );
+    return res.status(200).json({ 
+      success: true, 
+      message: "Address updated successfully!",
+      data:updatedAddress[0]
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating address.", error });
   }
 };
 

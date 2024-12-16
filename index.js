@@ -20,6 +20,9 @@ app.use(express.json());
 app.use('/api/v1/uploads/images', express.static(path.resolve(__dirname, 'uploads/images')));
 app.use(Router);
 
+//Mengambil gambar
+app.use('/product', express.static(path.join(__dirname, 'uploads/imagesproduct')));
+
 app.listen(process.env.APP_PORT, async () => {
     await testConnection();
     console.log(`Server berjalan di http://localhost:${process.env.APP_PORT}`);
