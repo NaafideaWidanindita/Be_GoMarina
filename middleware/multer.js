@@ -11,6 +11,15 @@ const storage = multer.diskStorage({
     },
 });
 
+const productStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "./uploads/imagesproduct"); // Folder untuk menyimpan file
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`); // Nama file unik
+    },
+});
+
 // Filter jenis file yang diizinkan
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png/;
