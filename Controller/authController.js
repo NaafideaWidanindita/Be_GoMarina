@@ -98,9 +98,10 @@ exports.signIn = async (req, res) => {
     return res.status(200).json({
       success: true, 
       message: 'Login successful',
-      accessToken,  // Send Access Token
+      accessToken,
       user: { 
         id: user.id,
+        name: user.name,
         username: user.username,
         role: user.role,
         telp: user.telp,
@@ -163,6 +164,38 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Error updating user.", error });
   }
 };
+
+// Get Address by Role ID
+exports.getAddressByRoleId = async (req, res) => {
+  const { role_id } = req.query;  // Mengambil role_id dari query parameter
+
+  if (!role_id) {
+    return res.status(400).json({ message: 'Role ID is required' });
+  }
+
+  try {
+    const addressResult = await query(
+      'SELECT * FROM address WHERE role_id = ?',
+      [role_id]
+    );
+
+    if (addressResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Address not found for the provided role_id'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Address retrieved successfully',
+      address: addressResult[0]
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error retrieving address.", error });
+  }
+};
+
 
 // Edit Alamat
 exports.updateAddress = async (req, res) => {
