@@ -2,27 +2,43 @@ const { query } = require("../Database/db");
 
 // Fungsi untuk mendapatkan semua produk
 const getAllProducts = async (req, res) => {
-    try {
-      const results = await query('SELECT * FROM product');
-      const productsWithImageUrl = results.map(product => ({
+  const { role_id } = req.query; 
+
+  if (!role_id) {
+    return res.status(400).json({
+      success: false,
+      message: "role_id is required!"
+    });
+  }
+
+  try {
+    const products = await query('SELECT * FROM product');
+        
+    // Ambil favorite berdasarkan role_id
+    const favorites = await query('SELECT product_id, isFavorite FROM favorite WHERE role_id = ?', [role_id]);
+    const favoriteMap = new Map(favorites.map(fav => [fav.product_id, fav.isFavorite]));
+    const productsWithIsFavorite = products.map(product => {
+      return {
         ...product,
-        imageUrl: product.image ? `http://localhost:5000/product/${product.image}` : ""
-      }));
-      res.status(200).json({
-        success: true,
-        message: "Products retrieved successfully!",
-        data: productsWithImageUrl
-      });
-    } catch (error) {
-      console.error("Error retrieving products:", error.message);
-      res.status(500).json({
-        success: false,
-        message: "Error retrieving products",
-        error: error.message
-      });
-    }
-  };
-  
+        imageUrl: product.image ? `http://localhost:5000/product/${product.image}` : "",
+        isFavorite: favoriteMap.get(product.id) === 1 // true jika isFavorite = 1, false jika 0
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Products retrieved successfully!",
+      data: productsWithIsFavorite
+    });
+  } catch (error) {
+    console.error("Error retrieving products:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving products",
+      error: error.message
+    });
+  }
+};
 
 // Fungsi untuk mendapatkan produk berdasarkan ID
 const getProductById = async (req, res) => {

@@ -8,6 +8,7 @@ const paymentRoutes = require("./paymentRoutes");
 const cartItemRoutes = require("./cart_itemRoutes");
 const productRoutes = require("./productRoutes");
 const roleRoutes = require("./roleRoutes");
+const favoriteRoutes = require("./favoriteRoutes");
 
 const Router = express();
 const api = "/api/v1";
@@ -21,5 +22,6 @@ Router.use(`${api}`, paymentRoutes);
 Router.use(`${api}`, cartItemRoutes);
 Router.use(`${api}`, productRoutes);
 Router.use(`${api}`, roleRoutes);
+Router.use(`${api}`, favoriteRoutes);
 
 module.exports = Router;
